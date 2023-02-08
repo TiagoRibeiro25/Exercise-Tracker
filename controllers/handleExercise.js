@@ -1,5 +1,5 @@
 const ConnectDatabase = require("../models/connectDatabase.js");
-const { getDateForNewExercise, convertDateToISO } = require("../utils/manageDate.js");
+const { getDateForNewExercise, convertDateToString } = require("../utils/manageDate.js");
 const { filterLogs } = require("../utils/filterLogs.js");
 
 async function handleAddExercise(req, res) {
@@ -11,15 +11,15 @@ async function handleAddExercise(req, res) {
 	};
 
 	const db = new ConnectDatabase();
-	const result = await db.storeNewExercise(newExercise);
-	const user = await db.getUserById(result.userId);
+	const user = await db.getUserById(newExercise.userId);
+	await db.storeNewExercise(newExercise);
 
 	const resResult = {
-		_id: result.userId,
+		_id: newExercise.userId,
 		username: user.username,
-		date: convertDateToISO(result.date),
-		duration: result.duration,
-		description: result.description,
+		date: convertDateToString(newExercise.date),
+		duration: newExercise.duration,
+		description: newExercise.description,
 	};
 
 	return res.json(resResult);
@@ -40,14 +40,14 @@ async function handleGetExercises(req, res) {
    user's id, username, count of exercises, and the log of exercises.
     */
 	const result = {
-		_id: user._id,
+		_id: userId,
 		username: user.username,
 		count: exercises.length,
 		log: exercises.map((exercise) => {
 			return {
 				description: exercise.description,
 				duration: exercise.duration,
-				date: convertDateToISO(exercise.date),
+				date: exercise.date,
 			};
 		}),
 	};
